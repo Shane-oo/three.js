@@ -93,6 +93,13 @@
 				const bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
 				bulbLight = new THREE.PointLight( 0xffee88, 1, 100, 2 );
 
+				const shadow = bulbLight.shadow;
+
+				shadow.camera.near = 0.01;
+				shadow.camera.far = 100;
+
+				shadow.bias = -0.0074;
+
 				bulbMat = new THREE.MeshStandardMaterial( {
 					emissive: 0xffffee,
 					emissiveIntensity: 1,
