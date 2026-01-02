@@ -92,6 +92,23 @@
 
 				const bulbGeometry = new THREE.SphereGeometry( 0.02, 16, 8 );
 				bulbLight = new THREE.PointLight( 0xffee88, 1, 100, 2 );
+				bulbLight.power = 225;
+
+				const shadow = bulbLight.shadow;
+
+				shadow.mapSize.width = 2048;
+				shadow.mapSize.height = 2048;
+
+				shadow.camera.near = 0.01;
+				shadow.camera.far = 10;
+
+				shadow.bias = -0.0074;
+				//shadow.normalBias = 0.01;
+
+				shadow.autoUpdate = false;
+				shadow.needsUpdate = true;
+
+				bulbLight.visible = true;
 
 				bulbMat = new THREE.MeshStandardMaterial( {
 					emissive: 0xffffee,
@@ -101,6 +118,7 @@
 				bulbLight.add( new THREE.Mesh( bulbGeometry, bulbMat ) );
 				bulbLight.position.set( 0, 2, 0 );
 				bulbLight.castShadow = true;
+
 				scene.add( bulbLight );
 
 				hemiLight = new THREE.HemisphereLight( 0xddeeff, 0x0f0e0d, 0.02 );
@@ -277,13 +295,14 @@
 
 				}
 
-				bulbLight.power = bulbLuminousPowers[ params.bulbPower ];
+				//bulbLight.power = bulbLuminousPowers[ params.bulbPower ];
 				bulbMat.emissiveIntensity = bulbLight.intensity / Math.pow( 0.02, 2.0 ); // convert from intensity to irradiance at bulb surface
 
 				hemiLight.intensity = hemiLuminousIrradiances[ params.hemiIrradiance ];
 				const time = Date.now() * 0.0005;
 
 				bulbLight.position.y = Math.cos( time ) * 0.75 + 1.25;
+				bulbLight.shadow.needsUpdate = true;
 
 				renderer.render( scene, camera );
 
