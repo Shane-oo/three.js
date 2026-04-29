@@ -30,6 +30,10 @@
 			import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 			import { UltraHDRLoader } from 'three/addons/loaders/UltraHDRLoader.js';
 			import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+			import * as MikkTSpace from 'three/addons/libs/mikktspace.module.js';
+			import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
+
 
 			let camera, scene, renderer, controls;
 			let currentModel, mixer;
@@ -68,7 +72,7 @@
 
 								const gui = new GUI();
 								const modelNames = models.map( m => m.name );
-								const params = { model: 'DamagedHelmet' };
+								const params = { model: 'DamagedHelmet', generateTangents: false };
 
 								if ( ! modelNames.includes( params.model ) && modelNames.length > 0 ) {
 
@@ -84,6 +88,13 @@
 								} );
 
 								gui.add( scene, 'backgroundBlurriness', 0, 1 );
+
+								gui.add(params, 'generateTangents')
+								.onChange( async generate =>{
+									if(generate){
+										await generateTangenets(currentModel);
+									}
+								})
 
 								const initialModel = models.find( m => m.name === params.model );
 								if ( initialModel ) loadModel( initialModel );
@@ -165,6 +176,36 @@
 
 				} );
 
+			}
+
+			async function generateTangenets(model){
+				console.log('generating tangents');
+
+				if(!MikkTSpace.isReady){
+					console.log('readying MikkTSpace');
+					//await MikkTSpace.ready();
+					await MikkTSpace.ready;
+				}
+
+				console.log(`MikkTSpace ready: ${MikkTSpace.isReady}`);
+				console.log(`MikkTSpace memory: ${MikkTSpace.wasm.memory.buffer.byteLength}`);
+
+				model.traverse(child=>{
+					if(child.type === 'Mesh'){
+						try {
+							// geometry must have position, normal and uv.
+							// note: will unindex geometry
+							BufferGeometryUtils.computeMikkTSpaceTangents(child.geometry, MikkTSpace, true);
+						} catch(e) {
+							context.warn(`computeMikkTSpaceTangents failed with error ${e} for object ${objectName} geometry.`);
+						}
+					}
+				})
+
+				console.log(`MikkTSpace memory after compute: ${MikkTSpace.wasm.memory.buffer.byteLength}`);
+
+				
+				//MikkTSpace.dispose();
 			}
 
 			function fitCameraToSelection( camera, controls, selection, fitOffset = 1.3 ) {
