@@ -183,8 +183,7 @@
 
 				if(!MikkTSpace.isReady){
 					console.log('readying MikkTSpace');
-					//await MikkTSpace.ready();
-					await MikkTSpace.ready;
+					await MikkTSpace.ready();
 				}
 
 				console.log(`MikkTSpace ready: ${MikkTSpace.isReady}`);
@@ -205,7 +204,7 @@
 				console.log(`MikkTSpace memory after compute: ${MikkTSpace.wasm.memory.buffer.byteLength}`);
 
 				
-				//MikkTSpace.dispose();
+				MikkTSpace.dispose();
 			}
 
 			function fitCameraToSelection( camera, controls, selection, fitOffset = 1.3 ) {
